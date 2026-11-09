@@ -1,0 +1,16 @@
+langchain-core
+langchain-community
+langchain-anthropic
+langchain-huggingface
+langchain-text-splitters
+sentence-transformers
+pypdf
+docx2txt
+faster-whisper
+av<18
+opencv-python-headless
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+supabase

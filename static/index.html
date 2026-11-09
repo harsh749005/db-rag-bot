@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask your file</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a1a;--muted:#777;--line:#e6e6e6;--accent:#1a1a1a}
+@media (prefers-color-scheme:dark){:root{--bg:#161616;--fg:#eee;--muted:#999;--line:#2c2c2c;--accent:#eee}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:48px 20px 0;min-height:100vh;display:flex;flex-direction:column}
+h1{font-size:20px;font-weight:500;margin:0 0 32px}
+h2{font-size:14px;font-weight:500;color:var(--muted);margin:32px 0 8px}
+.muted{color:var(--muted);font-size:14px}
+#drop{border:1px dashed var(--line);border-radius:12px;padding:48px 20px;text-align:center;cursor:pointer}
+#drop.over{border-color:var(--accent)}
+#error,#loginmsg{color:#c0392b;margin-top:12px;font-size:14px}
+.file{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.bar{height:2px;background:var(--line);overflow:hidden;margin:14px 0}
+.bar i{display:block;height:100%;width:30%;background:var(--accent);animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{margin-left:-30%}100%{margin-left:100%}}
+#chat{flex:1;display:flex;flex-direction:column}
+#top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+#msgs{flex:1;display:flex;flex-direction:column;gap:16px;padding-bottom:24px}
+.msg{white-space:pre-wrap;max-width:85%}
+.user{align-self:flex-end;background:var(--line);padding:8px 14px;border-radius:16px}
+.src{display:block;margin-top:4px}
+#askform{display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg);padding:12px 0 24px}
+#loginform{display:flex;flex-direction:column;gap:10px;max-width:320px}
+input[type=text],input[type=email],input[type=password]{font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit}
+#q{flex:1}
+button{font:inherit;padding:10px 16px;border:0;border-radius:10px;background:var(--accent);color:var(--bg);cursor:pointer}
+button.link{background:none;color:var(--muted);padding:0;font-size:14px;text-align:left}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ask your file</h1>
+
+  <section id="login" hidden>
+    <form id="loginform" onsubmit="event.preventDefault(); sendLogin('/login')">
+      <input id="email" type="email" placeholder="Email" autocomplete="email" required>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+      <button>Log in</button>
+      <button type="button" class="link" onclick="sendLogin('/signup')">Create an account</button>
+    </form>
+    <div id="loginmsg" hidden></div>
+  </section>
+
+  <section id="pick" hidden>
+    <div id="drop">Drop a file here, or click to choose<div class="muted">PDF, Word, image or video</div></div>
+    <input id="file" type="file" hidden accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.gif,.mp4,.mov,.mkv,.avi,.webm">
+    <div id="error" hidden></div>
+    <h2 id="filestitle" hidden>Your files</h2>
+    <div id="files"></div>
+    <h2><button class="link" onclick="showLogin()">Log out</button></h2>
+  </section>
+
+  <section id="loading" hidden>
+    <div id="fname" class="muted"></div>
+    <div class="bar"><i></i></div>
+    <div id="sentence" aria-live="polite"></div>
+  </section>
+
+  <section id="chat" hidden>
+    <div id="top"><span id="chatname" class="muted"></span><button class="link" onclick="loadFiles()">Your files</button></div>
+    <div id="msgs"></div>
+    <form id="askform" onsubmit="ask(event)">
+      <input id="q" type="text" placeholder="Ask a question" autocomplete="off">
+      <button>Ask</button>
+    </form>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Sentences shown while we work. They rotate every few seconds.
+const SENTENCES = {
+  starting: ["Getting your file ready..."],
+  uploading: ["Saving your file safely..."],
+  reading: ["Reading your file...", "Turning it into plain text...", "Still reading, almost there..."],
+  speech: ["Listening to the video...", "Writing down what people say...", "Long videos take a little while..."],
+  frames: ["Watching a few frames...", "Describing what is on screen...", "Looking for text on slides..."],
+  splitting: ["Cutting the text into small pieces..."],
+  indexing: ["Building a search index...", "Teaching the bot where things are..."]
+};
+
+let token = localStorage.getItem("token");
+let docId = null, docName = "", stage = "starting", tick = 0, poller = null, rotator = null, busy = false;
+
+function show(name) {
+  for (const id of ["login", "pick", "loading", "chat"]) $(id).hidden = id !== name;
+}
+
+// Call our server. If the login is no longer valid, go back to the login page.
+async function api(path, options = {}) {
+  options.headers = { ...(options.headers || {}), Authorization: "Bearer " + token };
+  const res = await fetch(path, options);
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    showLogin(data.detail);
+    throw new Error("login");
+  }
+  return { ok: res.ok, data };
+}
+
+// ---------- Login ----------
+
+function showLogin(message) {
+  clearInterval(poller); clearInterval(rotator);
+  token = null;
+  localStorage.removeItem("token");
+  show("login");
+  $("loginmsg").textContent = message || "";
+  $("loginmsg").hidden = !message;
+}
+
+async function sendLogin(path) {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: $("email").value, password: $("password").value })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return showLogin(data.detail || "Could not log in.");
+  if (!data.access_token) return showLogin(data.message);
+
+  token = data.access_token;
+  localStorage.setItem("token", token);
+  $("password").value = "";
+  loadFiles();
+}
+
+// ---------- Your files ----------
+
+async function loadFiles() {
+  clearInterval(poller); clearInterval(rotator);
+  show("pick");
+  const { data } = await api("/documents");
+  const list = data.documents || [];
+  $("files").textContent = "";
+  $("filestitle").hidden = list.length === 0;
+
+  for (const doc of list) {
+    const row = document.createElement("div");
+    row.className = "file";
+    const name = document.createElement("span");
+    name.textContent = doc.file_name;
+    const info = document.createElement("span");
+    info.className = "muted";
+    info.textContent = doc.file_type + " - " + doc.status;
+    row.append(name, info);
+    row.onclick = () => openDocument(doc);
+    $("files").appendChild(row);
+  }
+}
+
+function openDocument(doc) {
+  docId = doc.id;
+  docName = doc.file_name;
+  if (doc.status === "ready") return openChat();
+  if (doc.status === "failed") return fail(doc.error || "This file could not be processed.");
+  watch();
+}
+
+function fail(message) {
+  clearInterval(poller); clearInterval(rotator);
+  loadFiles();
+  $("error").textContent = message || "Something went wrong.";
+  $("error").hidden = false;
+}
+
+// ---------- Upload and loading sentences ----------
+
+function showSentence() {
+  const list = SENTENCES[stage] || SENTENCES.starting;
+  $("sentence").textContent = list[tick % list.length];
+}
+
+async function upload(file) {
+  $("error").hidden = true;
+  docName = file.name;
+  stage = "starting"; tick = 0;
+  show("loading");
+  $("fname").textContent = docName;
+  showSentence();
+
+  const form = new FormData();
+  form.append("file", file);
+  const { ok, data } = await api("/upload", { method: "POST", body: form });
+  if (!ok) return fail(data.detail);
+
+  docId = data.document_id;
+  watch();
+}
+
+function watch() {
+  clearInterval(poller); clearInterval(rotator);
+  stage = "starting"; tick = 0;
+  show("loading");
+  $("fname").textContent = docName;
+  showSentence();
+  rotator = setInterval(() => { tick++; showSentence(); }, 3000);
+  poller = setInterval(checkStatus, 1000);
+}
+
+async function checkStatus() {
+  const { data } = await api("/status/" + docId);
+  if (data.stage !== stage) { stage = data.stage; tick = 0; showSentence(); }
+  if (stage === "failed") fail(data.error);
+  if (stage === "ready") { clearInterval(poller); clearInterval(rotator); openChat(); }
+}
+
+// ---------- Chat ----------
+
+function addMessage(type, text, sources) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.textContent = text;
+  if (sources && sources.length) {
+    const small = document.createElement("small");
+    small.className = "muted src";
+    small.textContent = "Sources: " + sources.join(", ");
+    div.appendChild(small);
+  }
+  $("msgs").appendChild(div);
+  div.scrollIntoView({ block: "end" });
+  return div;
+}
+
+async function openChat() {
+  const { data } = await api("/chat/" + docId);
+  $("chatname").textContent = docName;
+  $("msgs").textContent = "";
+  for (const m of data.messages) addMessage(m.role === "user" ? "user" : "bot", m.content, m.sources);
+  if (!data.messages.length) addMessage("bot", "Your file is ready. Ask me anything about it.");
+  show("chat");
+  $("q").focus();
+}
+
+async function ask(event) {
+  event.preventDefault();
+  const question = $("q").value.trim();
+  if (!question || busy) return;
+  busy = true;
+  $("q").value = "";
+  addMessage("user", question);
+  const reply = addMessage("bot", "Thinking...");
+
+  try {
+    const { ok, data } = await api("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ document_id: docId, question: question })
+    });
+    reply.textContent = ok ? data.answer : (data.detail || "Something went wrong.");
+    if (ok && data.sources.length) {
+      const small = document.createElement("small");
+      small.className = "muted src";
+      small.textContent = "Sources: " + data.sources.join(", ");
+      reply.appendChild(small);
+    }
+  } catch (error) {
+    // api() already moved us to the login page when the login ended
+  }
+  busy = false;
+}
+
+// ---------- Start ----------
+
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+$("file").onchange = e => e.target.files[0] && upload(e.target.files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => {
+  e.preventDefault();
+  drop.classList.remove("over");
+  if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]);
+};
+
+if (token) loadFiles(); else showLogin();
+</script>
+</body>
+</html>
