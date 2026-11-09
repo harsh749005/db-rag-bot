@@ -73,6 +73,16 @@ def update_document(token, document_id, status, error=None):
     get_client(token).table("documents").update(row).eq("id", document_id).execute()
 
 
+def delete_document(token, document_id, storage_path):
+    client = get_client(token)
+    try:
+        client.storage.from_("uploads").remove([storage_path])
+    except Exception as error:
+        print("Could not remove the stored file:", error)  # still remove the database rows
+    # Chunks, chats and messages are removed too ("on delete cascade" in schema.sql)
+    client.table("documents").delete().eq("id", document_id).execute()
+
+
 def upload_file(token, storage_path, local_path):
     mime_type = mimetypes.guess_type(local_path)[0] or "application/octet-stream"
     with open(local_path, "rb") as file:

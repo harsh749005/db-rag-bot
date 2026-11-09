@@ -141,6 +141,7 @@ def signup(body: Login):
     try:
         session = database.sign_up(body.email, body.password)
     except Exception as error:
+        print("Signup error:", error)
         raise HTTPException(400, str(error))
     if session is None:
         return {"message": "Check your email to confirm your account, then log in."}
@@ -151,8 +152,9 @@ def signup(body: Login):
 def login(body: Login):
     try:
         session = database.sign_in(body.email, body.password)
-    except Exception:
-        raise HTTPException(401, "Wrong email or password.")
+    except Exception as error:
+        print("Login error:", error)
+        raise HTTPException(401, str(error))
     return {"access_token": session.access_token}
 
 
@@ -161,6 +163,14 @@ def login(body: Login):
 @app.get("/documents")
 def documents(user: dict = Depends(current_user)):
     return {"documents": database.list_documents(user["token"])}
+
+
+@app.delete("/documents/{document_id}")
+def remove_document(document_id: str, user: dict = Depends(current_user)):
+    document = find_document(user, document_id)
+    database.delete_document(user["token"], document_id, document["storage_path"])
+    jobs.pop(document_id, None)
+    return {"deleted": True}
 
 
 @app.post("/upload")
