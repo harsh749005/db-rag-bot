@@ -9,7 +9,7 @@ generate an answer grounded in those passages.
 > **Project:** Multimodal RAG-Based Question Answering System\
 > **Institution:** Lakehead University\
 > **Developers:** Harsh Patel and Sparsh Bhatt
-
+Repository link : [https://github.com/harsh749005/db-rag-bot]
 ------------------------------------------------------------------------
 
 ## Table of Contents
