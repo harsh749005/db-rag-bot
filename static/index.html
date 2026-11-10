@@ -1,547 +1,1095 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ask your file</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#fafafa;--side:#f1f1f1;--panel:#fff;--ink:#111;--muted:#737373;--line:#e4e4e4;--bubble:#ececec;--danger:#b42318}
-@media (prefers-color-scheme:dark){:root{--bg:#0c0c0c;--side:#080808;--panel:#151515;--ink:#f2f2f2;--muted:#8a8a8a;--line:#262626;--bubble:#222;--danger:#f08a80}}
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
-button{font:inherit;cursor:pointer;border:0;color:inherit}
-:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.muted{color:var(--muted);font-size:14px}
-svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner,.dot.processing{border:2.5px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite;flex:none}
-.spinner{width:24px;height:24px}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ask your file</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fafafa;
+        --side: #f1f1f1;
+        --panel: #fff;
+        --ink: #111;
+        --muted: #737373;
+        --line: #e4e4e4;
+        --bubble: #ececec;
+        --danger: #b42318;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c0c0c;
+          --side: #080808;
+          --panel: #151515;
+          --ink: #f2f2f2;
+          --muted: #8a8a8a;
+          --line: #262626;
+          --bubble: #222;
+          --danger: #f08a80;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 "Hanken Grotesk",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        border: 0;
+        color: inherit;
+      }
+      :focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .spinner,
+      .dot.processing {
+        border: 2.5px solid var(--line);
+        border-top-color: var(--ink);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex: none;
+      }
+      .spinner {
+        width: 24px;
+        height: 24px;
+      }
 
-/* Login */
-#login{min-height:100dvh;display:flex;align-items:center;padding:24px}
-.login-box{width:100%;max-width:380px;margin:0 auto}
-.login-box h1{font-size:clamp(34px,6vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:600;margin:0 0 12px}
-.lead{color:var(--muted);margin:0 0 28px}
-#loginform{display:flex;flex-direction:column;gap:10px}
-input{font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink)}
-input:focus{outline:none;border-color:var(--ink)}
-.primary{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-weight:500}
-.ghost{background:none;border:1px solid var(--line);padding:12px 16px;border-radius:14px}
-#loginmsg,#hint{color:var(--danger);font-size:14px;margin:10px 0 0}
+      /* Login */
+      #login {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        padding: 24px;
+      }
+      .login-box {
+        width: 100%;
+        max-width: 380px;
+        margin: 0 auto;
+      }
+      .login-box h1 {
+        font-size: clamp(34px, 6vw, 46px);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .lead {
+        color: var(--muted);
+        margin: 0 0 28px;
+      }
+      #loginform {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      input {
+        font: inherit;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        color: var(--ink);
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--ink);
+      }
+      .primary {
+        background: var(--ink);
+        color: var(--bg);
+        padding: 12px 16px;
+        border-radius: 14px;
+        font-weight: 500;
+      }
+      .ghost {
+        background: none;
+        border: 1px solid var(--line);
+        padding: 12px 16px;
+        border-radius: 14px;
+      }
+      #loginmsg,
+      #hint {
+        color: var(--danger);
+        font-size: 14px;
+        margin: 10px 0 0;
+      }
 
-/* App layout */
-#app{display:grid;grid-template-columns:272px 1fr;height:100dvh}
-aside{background:var(--side);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;min-height:0}
-.brand{font-weight:600;font-size:18px;letter-spacing:-.02em;padding:0 10px 20px}
-.new{display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:14px;font-weight:500;margin-bottom:18px}
-#files{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px}
-.item{display:flex;align-items:center;gap:4px;border-radius:12px;min-height:38px}
-.item:hover{background:var(--line)}
-.item.active{background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
-.open{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;text-align:left;padding:8px 6px 8px 10px;font-size:14px}
-.name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{width:8px;height:8px;border-radius:50%}
-.dot.ready{display:none}
-.dot.processing{width:14px;height:14px;border-width:2px}
-.dot.failed{background:var(--danger)}
-.trash{width:30px;height:30px;margin-right:4px;border-radius:8px;background:none;color:var(--muted);display:grid;place-items:center;opacity:0;flex:none}
-.trash svg{width:16px;height:16px}
-.item:hover .trash,.item:focus-within .trash{opacity:1}
-.trash:hover{color:var(--ink);background:var(--bubble)}
-@media (hover:none){.trash{opacity:1}}
-.item.confirm{padding:5px 6px 5px 10px;gap:6px;font-size:14px}
-.mini{padding:4px 10px;border-radius:9px;font-size:13px;background:var(--bubble)}
-.mini.strong{background:var(--ink);color:var(--bg)}
-.logout{background:none;color:var(--muted);font-size:14px;text-align:left;padding:10px}
+      /* App layout */
+      #app {
+        display: grid;
+        grid-template-columns: 272px 1fr;
+        height: 100dvh;
+      }
+      aside {
+        background: var(--side);
+        border-right: 1px solid var(--line);
+        padding: 20px 14px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .brand {
+        font-weight: 600;
+        font-size: 18px;
+        letter-spacing: -0.02em;
+        padding: 0 10px 20px;
+      }
+      .new {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--ink);
+        color: var(--bg);
+        padding: 10px 12px;
+        border-radius: 14px;
+        font-weight: 500;
+        margin-bottom: 18px;
+      }
+      #files {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        border-radius: 12px;
+        min-height: 38px;
+      }
+      .item:hover {
+        background: var(--line);
+      }
+      .item.active {
+        background: var(--panel);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .open {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        text-align: left;
+        padding: 8px 6px 8px 10px;
+        font-size: 14px;
+      }
+      .name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .dot.ready {
+        display: none;
+      }
+      .dot.processing {
+        width: 14px;
+        height: 14px;
+        border-width: 2px;
+      }
+      .dot.failed {
+        background: var(--danger);
+      }
+      .trash {
+        width: 30px;
+        height: 30px;
+        margin-right: 4px;
+        border-radius: 8px;
+        background: none;
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        opacity: 0;
+        flex: none;
+      }
+      .trash svg {
+        width: 16px;
+        height: 16px;
+      }
+      .item:hover .trash,
+      .item:focus-within .trash {
+        opacity: 1;
+      }
+      .trash:hover {
+        color: var(--ink);
+        background: var(--bubble);
+      }
+      @media (hover: none) {
+        .trash {
+          opacity: 1;
+        }
+      }
+      .item.confirm {
+        padding: 5px 6px 5px 10px;
+        gap: 6px;
+        font-size: 14px;
+      }
+      .mini {
+        padding: 4px 10px;
+        border-radius: 9px;
+        font-size: 13px;
+        background: var(--bubble);
+      }
+      .mini.strong {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .logout {
+        background: none;
+        color: var(--muted);
+        font-size: 14px;
+        text-align: left;
+        padding: 10px;
+      }
 
-main{display:flex;flex-direction:column;min-width:0;min-height:0;position:relative}
-header{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px;border-bottom:1px solid var(--line)}
-#title{font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.icon{width:40px;height:40px;border-radius:50%;background:none;display:grid;place-items:center;flex:none}
-.icon:hover{background:var(--bubble)}
-#menu{display:none}
-#scroll{flex:1;overflow:auto;display:flex;flex-direction:column;padding:28px 20px}
-#hero{margin:auto;text-align:center;max-width:460px}
-#hero h2{font-size:clamp(28px,4vw,38px);line-height:1.1;letter-spacing:-.03em;font-weight:600;margin:0 0 12px}
-#hero p{color:var(--muted);margin:0}
-#thread{width:100%;max-width:720px;margin:0 auto;padding-bottom:8px}
-.msg{margin-bottom:24px}
-.msg .text{white-space:pre-wrap}
-.msg.user{margin-left:auto;width:fit-content;max-width:80%;background:var(--bubble);padding:10px 16px;border-radius:20px 20px 6px 20px}
-.msg.thinking .text{color:var(--muted)}
-.msg.thinking .text::before{content:"";display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{background:var(--bubble);border:1px solid var(--line);font-size:13px;padding:0 10px;border-radius:999px}
-.card{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:16px 18px;margin-bottom:24px}
-.info{min-width:0}
-.filename{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sentence{color:var(--muted);font-size:15px}
+      main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        position: relative;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 52px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      #title {
+        font-size: 14px;
+        color: var(--muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: none;
+        display: grid;
+        place-items: center;
+        flex: none;
+      }
+      .icon:hover {
+        background: var(--bubble);
+      }
+      #menu {
+        display: none;
+      }
+      #scroll {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 28px 20px;
+      }
+      #hero {
+        margin: auto;
+        text-align: center;
+        max-width: 460px;
+      }
+      #hero h2 {
+        font-size: clamp(28px, 4vw, 38px);
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      #hero p {
+        color: var(--muted);
+        margin: 0;
+      }
+      #thread {
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        padding-bottom: 8px;
+      }
+      .msg {
+        margin-bottom: 24px;
+      }
+      .msg .text {
+        white-space: pre-wrap;
+      }
+      .msg.user {
+        margin-left: auto;
+        width: fit-content;
+        max-width: 80%;
+        background: var(--bubble);
+        padding: 10px 16px;
+        border-radius: 20px 20px 6px 20px;
+      }
+      .msg.thinking .text {
+        color: var(--muted);
+      }
+      .msg.thinking .text::before {
+        content: "";
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--line);
+        border-top-color: var(--ink);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: -2px;
+        margin-right: 8px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .chip {
+        background: var(--bubble);
+        border: 1px solid var(--line);
+        font-size: 13px;
+        padding: 0 10px;
+        border-radius: 999px;
+      }
+      .card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+      }
+      .info {
+        min-width: 0;
+      }
+      .filename {
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .sentence {
+        color: var(--muted);
+        font-size: 15px;
+      }
 
-/* Input bar */
-.dock{padding:0 20px 20px;width:100%;max-width:760px;margin:0 auto}
-#composer{display:flex;align-items:flex-end;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:26px;padding:6px}
-#composer:focus-within{border-color:var(--muted)}
-#q{flex:1;border:0;background:none;color:inherit;font:inherit;resize:none;padding:9px 6px;max-height:160px;line-height:1.5}
-#q:focus{outline:none}
-#send{width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;flex:none}
-#send:disabled{opacity:.3;cursor:default}
-.note{text-align:center;margin:8px 0 0}
-#main.drag::after{content:"Drop your file to start";position:absolute;inset:12px;border:2px dashed var(--muted);border-radius:22px;background:color-mix(in srgb,var(--bg) 90%,transparent);display:grid;place-items:center;font-weight:500}
+      /* Input bar */
+      .dock {
+        padding: 0 20px 20px;
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      #composer {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        padding: 6px;
+      }
+      #composer:focus-within {
+        border-color: var(--muted);
+      }
+      #q {
+        flex: 1;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        resize: none;
+        padding: 9px 6px;
+        max-height: 160px;
+        line-height: 1.5;
+      }
+      #q:focus {
+        outline: none;
+      }
+      #send {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--bg);
+        display: grid;
+        place-items: center;
+        flex: none;
+      }
+      #send:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+      .note {
+        text-align: center;
+        margin: 8px 0 0;
+      }
+      #main.drag::after {
+        content: "Drop your file to start";
+        position: absolute;
+        inset: 12px;
+        border: 2px dashed var(--muted);
+        border-radius: 22px;
+        background: color-mix(in srgb, var(--bg) 90%, transparent);
+        display: grid;
+        place-items: center;
+        font-weight: 500;
+      }
 
-#backdrop{display:none}
-@media (max-width:760px){
-  #app{grid-template-columns:1fr}
-  aside{position:fixed;inset:0 auto 0 0;width:272px;z-index:20;transform:translateX(-100%);transition:transform .2s}
-  #app.open aside{transform:none}
-  #app.open #backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10}
-  #menu{display:grid}
-}
-@media (prefers-reduced-motion:reduce){*{animation-duration:3s!important;transition:none!important}}
-</style>
-</head>
-<body>
-
-<div id="login" hidden>
-  <div class="login-box">
-    <h1>Ask your file</h1>
-    <p class="lead">Attach a PDF, Word file, image or video, then ask questions about it.</p>
-    <form id="loginform" onsubmit="event.preventDefault(); sendLogin('/login')">
-      <input id="email" type="email" placeholder="Email" autocomplete="email">
-      <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-      <button class="primary">Log in</button>
-      <button type="button" class="ghost" onclick="sendLogin('/signup')">Create account</button>
-    </form>
-    <p id="loginmsg" role="alert" hidden></p>
-  </div>
-</div>
-
-<div id="app" hidden>
-  <div id="backdrop" onclick="closeMenu()"></div>
-  <aside>
-    <div class="brand">Ask your file</div>
-    <button class="new" onclick="newFile()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New file</button>
-    <nav id="files" aria-label="Your files"></nav>
-    <button class="logout" onclick="showLogin()">Log out</button>
-  </aside>
-
-  <main id="main">
-    <header>
-      <button id="menu" class="icon" aria-label="Open your files" onclick="$('app').classList.toggle('open')"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <span id="title"></span>
-    </header>
-
-    <div id="scroll">
-      <div id="hero">
-        <h2>Ask anything about a file</h2>
-        <p>Attach a PDF, Word file, image or video, then ask your questions.</p>
+      #backdrop {
+        display: none;
+      }
+      @media (max-width: 760px) {
+        #app {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          position: fixed;
+          inset: 0 auto 0 0;
+          width: 272px;
+          z-index: 20;
+          transform: translateX(-100%);
+          transition: transform 0.2s;
+        }
+        #app.open aside {
+          transform: none;
+        }
+        #app.open #backdrop {
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.4);
+          z-index: 10;
+        }
+        #menu {
+          display: grid;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 3s !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login" hidden>
+      <div class="login-box">
+        <h1>Ask your file</h1>
+        <p class="lead">
+          Attach a PDF, Word file, image or video, then ask questions about it.
+        </p>
+        <form
+          id="loginform"
+          onsubmit="
+            event.preventDefault();
+            sendLogin('/login');
+          "
+        >
+          <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+          />
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+          <button class="primary">Log in</button>
+          <button type="button" class="ghost" onclick="sendLogin('/signup')">
+            Create account
+          </button>
+        </form>
+        <p id="loginmsg" role="alert" hidden></p>
       </div>
-      <div id="thread"></div>
     </div>
 
-    <div class="dock">
-      <form id="composer" onsubmit="ask(event)">
-        <button type="button" id="attach" class="icon" aria-label="Attach a file"><svg viewBox="0 0 24 24"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg></button>
-        <textarea id="q" rows="1" placeholder="Attach a file to begin"></textarea>
-        <button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-      </form>
-      <input id="file" type="file" hidden accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.gif,.mp4,.mov,.mkv,.avi,.webm">
-      <p id="hint" role="alert" hidden></p>
-      <p class="note muted">Each file has its own chat. Attaching a new file starts a new one.</p>
+    <div id="app" hidden>
+      <div id="backdrop" onclick="closeMenu()"></div>
+      <aside>
+        <div class="brand">Ask your file</div>
+        <button class="new" onclick="newFile()">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>New file
+        </button>
+        <nav id="files" aria-label="Your files"></nav>
+        <button class="logout" onclick="showLogin()">Log out</button>
+      </aside>
+
+      <main id="main">
+        <header>
+          <button
+            id="menu"
+            class="icon"
+            aria-label="Open your files"
+            onclick="$('app').classList.toggle('open')"
+          >
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <span id="title"></span>
+        </header>
+
+        <div id="scroll">
+          <div id="hero">
+            <h2>Ask anything about a file</h2>
+            <p>
+              Attach a PDF, Word file, image or video, then ask your questions.
+            </p>
+          </div>
+          <div id="thread"></div>
+        </div>
+
+        <div class="dock">
+          <form id="composer" onsubmit="ask(event)">
+            <button
+              type="button"
+              id="attach"
+              class="icon"
+              aria-label="Attach a file"
+            >
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"
+                />
+              </svg>
+            </button>
+            <textarea
+              id="q"
+              rows="1"
+              placeholder="Attach a file to begin"
+            ></textarea>
+            <button id="send" aria-label="Send">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+            </button>
+          </form>
+          <input
+            id="file"
+            type="file"
+            hidden
+            accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.gif,.mp4,.mov,.mkv,.avi,.webm"
+          />
+          <p id="hint" role="alert" hidden></p>
+          <p class="note muted">
+            Each file has its own chat. Attaching a new file starts a new one.
+          </p>
+        </div>
+      </main>
     </div>
-  </main>
-</div>
 
-<script>
-const $ = id => document.getElementById(id);
+    <script>
+      const $ = (id) => document.getElementById(id);
 
-// Sentences shown while a file is being prepared. They rotate every few seconds.
-const SENTENCES = {
-  starting: ["Getting your file ready..."],
-  uploading: ["Saving your file safely..."],
-  reading: ["Reading your file...", "Turning it into plain text...", "Still reading, almost there..."],
-  speech: ["Listening to the video...", "Writing down what people say...", "Long videos take a little while..."],
-  frames: ["Watching a few frames...", "Describing what is on screen...", "Looking for text on slides..."],
-  splitting: ["Cutting the text into small pieces..."],
-  indexing: ["Building a search index...", "Teaching the bot where things are..."]
-};
+      // Sentences shown while a file is being prepared. They rotate every few seconds.
+      const SENTENCES = {
+        starting: ["Getting your file ready..."],
+        uploading: ["Saving your file safely..."],
+        reading: [
+          "Reading your file...",
+          "Turning it into plain text...",
+          "Still reading, almost there...",
+        ],
+        speech: [
+          "Listening to the video...",
+          "Writing down what people say...",
+          "Long videos take a little while...",
+        ],
+        frames: [
+          "Watching a few frames...",
+          "Describing what is on screen...",
+          "Looking for text on slides...",
+        ],
+        splitting: ["Cutting the text into small pieces..."],
+        indexing: [
+          "Building a search index...",
+          "Teaching the bot where things are...",
+        ],
+      };
 
-// A fixed icon (not user text), so it is safe to use as HTML
-const TRASH_ICON = '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+      // A fixed icon (not user text), so it is safe to use as HTML
+      const TRASH_ICON =
+        '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
 
-let token = localStorage.getItem("token");
-let files = [];
-let docId = null, docName = "", ready = false, busy = false;
-let stage = "starting", tick = 0, poller = null, rotator = null, loadingCard = null;
+      let token = localStorage.getItem("token");
+      let files = [];
+      let docId = null,
+        docName = "",
+        ready = false,
+        busy = false;
+      let stage = "starting",
+        tick = 0,
+        poller = null,
+        rotator = null,
+        loadingCard = null;
 
-// ---------- Server calls and login ----------
+      // ---------- Server calls and login ----------
 
-async function api(path, options = {}) {
-  options.headers = { ...(options.headers || {}), Authorization: "Bearer " + token };
-  const res = await fetch(path, options);
-  const data = await res.json().catch(() => ({}));
-  if (res.status === 401) {
-    showLogin(data.detail);
-    throw new Error("login");
-  }
-  return { ok: res.ok, data };
-}
+      async function api(path, options = {}) {
+        options.headers = {
+          ...(options.headers || {}),
+          Authorization: "Bearer " + token,
+        };
+        const res = await fetch(path, options);
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          showLogin(data.detail);
+          throw new Error("login");
+        }
+        return { ok: res.ok, data };
+      }
 
-function showLogin(message) {
-  stopWatching();
-  token = null;
-  localStorage.removeItem("token");
-  $("app").hidden = true;
-  $("login").hidden = false;
-  $("loginmsg").textContent = message || "";
-  $("loginmsg").hidden = !message;
-}
+      function showLogin(message) {
+        stopWatching();
+        token = null;
+        localStorage.removeItem("token");
+        $("app").hidden = true;
+        $("login").hidden = false;
+        $("loginmsg").textContent = message || "";
+        $("loginmsg").hidden = !message;
+      }
 
-async function sendLogin(path) {
-  if (!$("email").value || !$("password").value) return showLogin("Please type your email and password first.");
-  const res = await fetch(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: $("email").value, password: $("password").value })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return showLogin(data.detail || "Could not log in.");
-  if (!data.access_token) return showLogin(data.message);
+      async function sendLogin(path) {
+        if (!$("email").value || !$("password").value)
+          return showLogin("Please type your email and password first.");
+        const res = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: $("email").value,
+            password: $("password").value,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return showLogin(data.detail || "Could not log in.");
+        if (!data.access_token) return showLogin(data.message);
 
-  token = data.access_token;
-  localStorage.setItem("token", token);
-  $("password").value = "";
-  startApp();
-}
+        token = data.access_token;
+        localStorage.setItem("token", token);
+        $("password").value = "";
+        startApp();
+      }
 
-function startApp() {
-  $("login").hidden = true;
-  $("app").hidden = false;
-  newFile();
-  loadFiles();
-}
+      function startApp() {
+        $("login").hidden = true;
+        $("app").hidden = false;
+        newFile();
+        loadFiles();
+      }
 
-// ---------- Sidebar ----------
+      // ---------- Sidebar ----------
 
-async function loadFiles() {
-  const { data } = await api("/documents");
-  files = data.documents || [];
-  renderFiles();
-}
+      async function loadFiles() {
+        const { data } = await api("/documents");
+        files = data.documents || [];
+        renderFiles();
+      }
 
-function renderFiles() {
-  const list = $("files");
-  list.textContent = "";
+      function renderFiles() {
+        const list = $("files");
+        list.textContent = "";
 
-  for (const doc of files) {
-    const row = document.createElement("div");
-    row.className = "item";
-    row.dataset.id = doc.id;
+        for (const doc of files) {
+          const row = document.createElement("div");
+          row.className = "item";
+          row.dataset.id = doc.id;
 
-    const open = document.createElement("button");
-    open.className = "open";
-    const name = document.createElement("span");
-    name.className = "name";
-    name.textContent = doc.file_name;
-    const dot = document.createElement("span");
-    dot.className = "dot " + doc.status;
-    open.append(name, dot);
-    open.onclick = () => openDocument(doc);
+          const open = document.createElement("button");
+          open.className = "open";
+          const name = document.createElement("span");
+          name.className = "name";
+          name.textContent = doc.file_name;
+          const dot = document.createElement("span");
+          dot.className = "dot " + doc.status;
+          open.append(name, dot);
+          open.onclick = () => openDocument(doc);
 
-    const trash = document.createElement("button");
-    trash.className = "trash";
-    trash.setAttribute("aria-label", "Delete " + doc.file_name);
-    trash.innerHTML = TRASH_ICON;
-    trash.onclick = () => askDelete(row, doc);
+          const trash = document.createElement("button");
+          trash.className = "trash";
+          trash.setAttribute("aria-label", "Delete " + doc.file_name);
+          trash.innerHTML = TRASH_ICON;
+          trash.onclick = () => askDelete(row, doc);
 
-    row.append(open, trash);
-    list.appendChild(row);
-  }
+          row.append(open, trash);
+          list.appendChild(row);
+        }
 
-  if (!files.length) {
-    const empty = document.createElement("p");
-    empty.className = "muted";
-    empty.style.padding = "0 10px";
-    empty.textContent = "Your files will appear here.";
-    list.appendChild(empty);
-  }
-  markActive();
-}
+        if (!files.length) {
+          const empty = document.createElement("p");
+          empty.className = "muted";
+          empty.style.padding = "0 10px";
+          empty.textContent = "Your files will appear here.";
+          list.appendChild(empty);
+        }
+        markActive();
+      }
 
-function markActive() {
-  for (const item of $("files").querySelectorAll(".item")) {
-    item.classList.toggle("active", item.dataset.id === docId);
-  }
-}
+      function markActive() {
+        for (const item of $("files").querySelectorAll(".item")) {
+          item.classList.toggle("active", item.dataset.id === docId);
+        }
+      }
 
-function closeMenu() { $("app").classList.remove("open"); }
+      function closeMenu() {
+        $("app").classList.remove("open");
+      }
 
-// ---------- Delete a file ----------
+      // ---------- Delete a file ----------
 
-function askDelete(row, doc) {
-  // Replace the row with a small "are you sure" question
-  row.textContent = "";
-  row.className = "item confirm";
-  const label = document.createElement("span");
-  label.className = "name";
-  label.textContent = "Delete?";
-  const yes = document.createElement("button");
-  yes.className = "mini strong";
-  yes.textContent = "Delete";
-  yes.onclick = () => deleteFile(doc);
-  const no = document.createElement("button");
-  no.className = "mini";
-  no.textContent = "Cancel";
-  no.onclick = renderFiles;
-  row.append(label, yes, no);
-}
+      function askDelete(row, doc) {
+        // Replace the row with a small "are you sure" question
+        row.textContent = "";
+        row.className = "item confirm";
+        const label = document.createElement("span");
+        label.className = "name";
+        label.textContent = "Delete?";
+        const yes = document.createElement("button");
+        yes.className = "mini strong";
+        yes.textContent = "Delete";
+        yes.onclick = () => deleteFile(doc);
+        const no = document.createElement("button");
+        no.className = "mini";
+        no.textContent = "Cancel";
+        no.onclick = renderFiles;
+        row.append(label, yes, no);
+      }
 
-async function deleteFile(doc) {
-  const { ok, data } = await api("/documents/" + doc.id, { method: "DELETE" });
-  if (!ok) {
-    renderFiles();
-    return setHint(data.detail || "Could not delete the file. Please try again.");
-  }
-  if (doc.id === docId) newFile();  // you were looking at it
-  loadFiles();
-}
+      async function deleteFile(doc) {
+        const { ok, data } = await api("/documents/" + doc.id, {
+          method: "DELETE",
+        });
+        if (!ok) {
+          renderFiles();
+          return setHint(
+            data.detail || "Could not delete the file. Please try again.",
+          );
+        }
+        if (doc.id === docId) newFile(); // you were looking at it
+        loadFiles();
+      }
 
-// ---------- Screens ----------
+      // ---------- Screens ----------
 
-function clearThread() { $("thread").textContent = ""; loadingCard = null; }
-function setHint(text) { $("hint").textContent = text; $("hint").hidden = !text; }
-function scrollDown() { $("scroll").scrollTop = $("scroll").scrollHeight; }
+      function clearThread() {
+        $("thread").textContent = "";
+        loadingCard = null;
+      }
+      function setHint(text) {
+        $("hint").textContent = text;
+        $("hint").hidden = !text;
+      }
+      function scrollDown() {
+        $("scroll").scrollTop = $("scroll").scrollHeight;
+      }
 
-function setComposer(enabled, placeholder) {
-  $("q").disabled = !enabled;
-  $("send").disabled = !enabled;
-  $("q").placeholder = placeholder;
-}
+      function setComposer(enabled, placeholder) {
+        $("q").disabled = !enabled;
+        $("send").disabled = !enabled;
+        $("q").placeholder = placeholder;
+      }
 
-function startView(doc_id, name) {
-  stopWatching();
-  closeMenu();
-  setHint("");
-  docId = doc_id;
-  docName = name;
-  ready = false;
-  $("title").textContent = name;
-  $("hero").hidden = name !== "";
-  clearThread();
-  markActive();
-}
+      function startView(doc_id, name) {
+        stopWatching();
+        closeMenu();
+        setHint("");
+        docId = doc_id;
+        docName = name;
+        ready = false;
+        $("title").textContent = name;
+        $("hero").hidden = name !== "";
+        clearThread();
+        markActive();
+      }
 
-function newFile() {
-  startView(null, "");
-  setComposer(true, "Attach a file to begin");
-}
+      function newFile() {
+        startView(null, "");
+        setComposer(true, "Attach a file to begin");
+      }
 
-function openDocument(doc) {
-  startView(doc.id, doc.file_name);
-  setComposer(false, "Preparing your file...");
-  if (doc.status === "ready") return openChat();
-  if (doc.status === "failed") return addMessage("bot", doc.error || "This file could not be processed.");
-  showLoadingCard();
-  watch();
-}
+      function openDocument(doc) {
+        startView(doc.id, doc.file_name);
+        setComposer(false, "Preparing your file...");
+        if (doc.status === "ready") return openChat();
+        if (doc.status === "failed")
+          return addMessage(
+            "bot",
+            doc.error || "This file could not be processed.",
+          );
+        showLoadingCard();
+        watch();
+      }
 
-// ---------- Upload and loading sentences ----------
+      // ---------- Upload and loading sentences ----------
 
-async function upload(file) {
-  startView(null, file.name);
-  setComposer(false, "Preparing your file...");
-  showLoadingCard();
+      async function upload(file) {
+        startView(null, file.name);
+        setComposer(false, "Preparing your file...");
+        showLoadingCard();
 
-  const form = new FormData();
-  form.append("file", file);
-  const { ok, data } = await api("/upload", { method: "POST", body: form });
-  if (!ok) {
-    newFile();
-    return setHint(data.detail || "The upload failed. Please try again.");
-  }
+        const form = new FormData();
+        form.append("file", file);
+        const { ok, data } = await api("/upload", {
+          method: "POST",
+          body: form,
+        });
+        if (!ok) {
+          newFile();
+          return setHint(data.detail || "The upload failed. Please try again.");
+        }
 
-  docId = data.document_id;
-  markActive();
-  loadFiles();
-  watch();
-}
+        docId = data.document_id;
+        markActive();
+        loadFiles();
+        watch();
+      }
 
-function showLoadingCard() {
-  stage = "starting";
-  tick = 0;
-  const el = document.createElement("div");
-  el.className = "card";
-  const spinner = document.createElement("div");
-  spinner.className = "spinner";
-  const info = document.createElement("div");
-  info.className = "info";
-  const name = document.createElement("div");
-  name.className = "filename";
-  name.textContent = docName;
-  const sentence = document.createElement("div");
-  sentence.className = "sentence";
-  sentence.setAttribute("aria-live", "polite");
-  info.append(name, sentence);
-  el.append(spinner, info);
-  $("thread").appendChild(el);
-  loadingCard = { el, sentence };
-  showSentence();
-}
+      function showLoadingCard() {
+        stage = "starting";
+        tick = 0;
+        const el = document.createElement("div");
+        el.className = "card";
+        const spinner = document.createElement("div");
+        spinner.className = "spinner";
+        const info = document.createElement("div");
+        info.className = "info";
+        const name = document.createElement("div");
+        name.className = "filename";
+        name.textContent = docName;
+        const sentence = document.createElement("div");
+        sentence.className = "sentence";
+        sentence.setAttribute("aria-live", "polite");
+        info.append(name, sentence);
+        el.append(spinner, info);
+        $("thread").appendChild(el);
+        loadingCard = { el, sentence };
+        showSentence();
+      }
 
-function showSentence() {
-  if (!loadingCard) return;
-  const list = SENTENCES[stage] || SENTENCES.starting;
-  loadingCard.sentence.textContent = list[tick % list.length];
-}
+      function showSentence() {
+        if (!loadingCard) return;
+        const list = SENTENCES[stage] || SENTENCES.starting;
+        loadingCard.sentence.textContent = list[tick % list.length];
+      }
 
-function watch() {
-  stopWatching();
-  rotator = setInterval(() => { tick++; showSentence(); }, 3000);
-  poller = setInterval(checkStatus, 1000);
-}
+      function watch() {
+        stopWatching();
+        rotator = setInterval(() => {
+          tick++;
+          showSentence();
+        }, 3000);
+        poller = setInterval(checkStatus, 1000);
+      }
 
-function stopWatching() { clearInterval(poller); clearInterval(rotator); }
+      function stopWatching() {
+        clearInterval(poller);
+        clearInterval(rotator);
+      }
 
-async function checkStatus() {
-  const id = docId;
-  const { data } = await api("/status/" + id);
-  if (id !== docId) return;  // you opened another file meanwhile
+      async function checkStatus() {
+        const id = docId;
+        const { data } = await api("/status/" + id);
+        if (id !== docId) return; // you opened another file meanwhile
 
-  if (data.stage !== stage) { stage = data.stage; tick = 0; showSentence(); }
-  if (stage === "failed") {
-    stopWatching();
-    clearThread();
-    addMessage("bot", data.error || "This file could not be processed.");
-    loadFiles();
-  }
-  if (stage === "ready") {
-    stopWatching();
-    loadFiles();
-    openChat();
-  }
-}
+        if (data.stage !== stage) {
+          stage = data.stage;
+          tick = 0;
+          showSentence();
+        }
+        if (stage === "failed") {
+          stopWatching();
+          clearThread();
+          addMessage("bot", data.error || "This file could not be processed.");
+          loadFiles();
+        }
+        if (stage === "ready") {
+          stopWatching();
+          loadFiles();
+          openChat();
+        }
+      }
 
-// ---------- Chat ----------
+      // ---------- Chat ----------
 
-function setSources(div, sources) {
-  if (!sources || !sources.length) return;
-  const row = document.createElement("div");
-  row.className = "chips";
-  for (const source of sources) {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    chip.textContent = source;
-    row.appendChild(chip);
-  }
-  div.appendChild(row);
-}
+      function setSources(div, sources) {
+        if (!sources || !sources.length) return;
+        const row = document.createElement("div");
+        row.className = "chips";
+        for (const source of sources) {
+          const chip = document.createElement("span");
+          chip.className = "chip";
+          chip.textContent = source;
+          row.appendChild(chip);
+        }
+        div.appendChild(row);
+      }
 
-// Show **text** as bold. We build the elements ourselves, so this is safe.
-function setText(element, text) {
-  element.textContent = "";
-  text.split(/\*\*(.+?)\*\*/).forEach((part, i) => {
-    if (i % 2 === 1) {
-      const bold = document.createElement("strong");
-      bold.textContent = part;
-      element.appendChild(bold);
-    } else {
-      element.appendChild(document.createTextNode(part));
-    }
-  });
-}
+      // Show **text** as bold. We build the elements ourselves, so this is safe.
+      function setText(element, text) {
+        element.textContent = "";
+        text.split(/\*\*(.+?)\*\*/).forEach((part, i) => {
+          if (i % 2 === 1) {
+            const bold = document.createElement("strong");
+            bold.textContent = part;
+            element.appendChild(bold);
+          } else {
+            element.appendChild(document.createTextNode(part));
+          }
+        });
+      }
 
-function addMessage(type, text, sources) {
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  const body = document.createElement("div");
-  body.className = "text";
-  if (type === "bot") setText(body, text); else body.textContent = text;
-  div.appendChild(body);
-  setSources(div, sources);
-  $("thread").appendChild(div);
-  scrollDown();
-  return div;
-}
+      function addMessage(type, text, sources) {
+        const div = document.createElement("div");
+        div.className = "msg " + type;
+        const body = document.createElement("div");
+        body.className = "text";
+        if (type === "bot") setText(body, text);
+        else body.textContent = text;
+        div.appendChild(body);
+        setSources(div, sources);
+        $("thread").appendChild(div);
+        scrollDown();
+        return div;
+      }
 
-async function openChat() {
-  const id = docId;
-  const { data } = await api("/chat/" + id);
-  if (id !== docId) return;
+      async function openChat() {
+        const id = docId;
+        const { data } = await api("/chat/" + id);
+        if (id !== docId) return;
 
-  clearThread();
-  for (const m of data.messages) addMessage(m.role === "user" ? "user" : "bot", m.content, m.sources);
-  if (!data.messages.length) addMessage("bot", "Your file is ready. What would you like to know?");
-  ready = true;
-  setComposer(true, "Ask a question about this file");
-  $("q").focus();
-  requestAnimationFrame(scrollDown);  // once the page has finished laying out
-}
+        clearThread();
+        for (const m of data.messages)
+          addMessage(m.role === "user" ? "user" : "bot", m.content, m.sources);
+        if (!data.messages.length)
+          addMessage("bot", "Your file is ready. What would you like to know?");
+        ready = true;
+        setComposer(true, "Ask a question about this file");
+        $("q").focus();
+        requestAnimationFrame(scrollDown); // once the page has finished laying out
+      }
 
-async function ask(event) {
-  event.preventDefault();
-  setHint("");
-  const question = $("q").value.trim();
-  if (!ready) return setHint("Attach a file first, then ask your question.");
-  if (!question || busy) return;
+      async function ask(event) {
+        event.preventDefault();
+        setHint("");
+        const question = $("q").value.trim();
+        if (!ready)
+          return setHint("Attach a file first, then ask your question.");
+        if (!question || busy) return;
 
-  busy = true;
-  $("q").value = "";
-  grow();
-  addMessage("user", question);
-  const reply = addMessage("bot", "Thinking...");
-  reply.classList.add("thinking");
+        busy = true;
+        $("q").value = "";
+        grow();
+        addMessage("user", question);
+        const reply = addMessage("bot", "Thinking...");
+        reply.classList.add("thinking");
 
-  try {
-    const { ok, data } = await api("/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ document_id: docId, question: question })
-    });
-    reply.classList.remove("thinking");
-    setText(reply.firstChild, ok ? data.answer : (data.detail || "Something went wrong."));
-    if (ok) setSources(reply, data.sources);
-  } catch (error) {
-    // api() already moved us to the login page when the login ended
-  }
-  busy = false;
-  scrollDown();
-}
+        try {
+          const { ok, data } = await api("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ document_id: docId, question: question }),
+          });
+          reply.classList.remove("thinking");
+          setText(
+            reply.firstChild,
+            ok ? data.answer : data.detail || "Something went wrong.",
+          );
+          if (ok) setSources(reply, data.sources);
+        } catch (error) {
+          // api() already moved us to the login page when the login ended
+        }
+        busy = false;
+        scrollDown();
+      }
 
-// ---------- Input bar ----------
+      // ---------- Input bar ----------
 
-function grow() {
-  $("q").style.height = "auto";
-  $("q").style.height = Math.min($("q").scrollHeight, 160) + "px";
-}
+      function grow() {
+        $("q").style.height = "auto";
+        $("q").style.height = Math.min($("q").scrollHeight, 160) + "px";
+      }
 
-$("q").addEventListener("input", grow);
-$("q").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("composer").requestSubmit(); }
-});
+      $("q").addEventListener("input", grow);
+      $("q").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          $("composer").requestSubmit();
+        }
+      });
 
-$("attach").onclick = () => $("file").click();
-$("file").onchange = e => {
-  const file = e.target.files[0];
-  e.target.value = "";  // lets you pick the same file again later
-  if (file) upload(file);
-};
+      $("attach").onclick = () => $("file").click();
+      $("file").onchange = (e) => {
+        const file = e.target.files[0];
+        e.target.value = ""; // lets you pick the same file again later
+        if (file) upload(file);
+      };
 
-// Drop a file anywhere on the chat area
-const main = $("main");
-main.ondragover = e => { e.preventDefault(); main.classList.add("drag"); };
-main.ondragleave = e => { if (e.target === main) main.classList.remove("drag"); };
-main.ondrop = e => {
-  e.preventDefault();
-  main.classList.remove("drag");
-  if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]);
-};
+      // Drop a file anywhere on the chat area
+      const main = $("main");
+      main.ondragover = (e) => {
+        e.preventDefault();
+        main.classList.add("drag");
+      };
+      main.ondragleave = (e) => {
+        if (e.target === main) main.classList.remove("drag");
+      };
+      main.ondrop = (e) => {
+        e.preventDefault();
+        main.classList.remove("drag");
+        if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]);
+      };
 
-// ---------- Start ----------
+      // ---------- Start ----------
 
-if (token) startApp(); else showLogin();
-</script>
-</body>
+      if (token) startApp();
+      else showLogin();
+    </script>
+  </body>
 </html>
